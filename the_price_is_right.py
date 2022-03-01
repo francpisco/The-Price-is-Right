@@ -16,6 +16,7 @@ class Game(tk.Frame):
         super().__init__(parent)
         self.parent = parent
         self.wheel_position = 0
+        self.step = 50
 
         self.create_widgets()
 
@@ -45,10 +46,10 @@ class Game(tk.Frame):
     def mouse_bt_released(self, event):
         """Callback function for release button on wheel."""
         print("Spin that wheel!!!", event.x, event.y)
-        self.spin_wheel()
+        self.push_wheel()
 
-    def update_image(self):
-        """Update wheel image."""
+    def spin_wheel(self):
+        """Make wheel spin using sequence of images."""
         file_name = f"imgs/wheel_{self.wheel_numbers[self.wheel_position]}.png"
         img = tk.PhotoImage(file=file_name)
         self.photo_lbl.config(image=img)
@@ -57,10 +58,17 @@ class Game(tk.Frame):
             self.wheel_position += 1
         else:
             self.wheel_position = 0
+        self.push_wheel()
 
-    def spin_wheel(self):
-        """Make wheel spin."""
-        self.parent.after(100, self.update_image)
+    def push_wheel(self):
+        """Control movement of wheel."""
+        self.step = round(self.step * 1.1)
+        print(self.step)
+        if self.step < 600:
+            self.parent.after(self.step, self.spin_wheel)
+        else:
+            self.step = 50
+
 
 
 def main():
