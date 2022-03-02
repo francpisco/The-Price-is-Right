@@ -2,7 +2,13 @@
 to try to get as close as possible to 100 points without going over."""
 
 import tkinter as tk
+import time
 import random
+
+WHEEL_SPIN_MULTIPLIER = 20_000
+WHEEL_STOP_STEP = 600
+WHEEL_MIN_STEP = 5
+WHEEL_DAMPENING = 1.1
 
 class Game(tk.Frame):
     """GUI application for the price is right."""
@@ -16,7 +22,6 @@ class Game(tk.Frame):
         super().__init__(parent)
         self.parent = parent
         self.wheel_position = 0
-        self.step = 50
 
         self.create_widgets()
 
@@ -41,11 +46,16 @@ class Game(tk.Frame):
 
     def mouse_bt_pressed(self, event):
         """Callback function for clicking button on the wheel."""
+        self.wheel_init_time = time.time()
         print("SSpinnig!", event.x, event.y)
+        self.wheel_init_y = event.y
     
     def mouse_bt_released(self, event):
         """Callback function for release button on wheel."""
+        self.wheel_dif_time = time.time() - self.wheel_init_time
         print("Spin that wheel!!!", event.x, event.y)
+        self.wheel_dif_y = event.y - self.wheel_init_y
+        self.calculate_init_wheel_step()
         self.push_wheel()
 
     def spin_wheel(self):
@@ -60,15 +70,20 @@ class Game(tk.Frame):
             self.wheel_position = 0
         self.push_wheel()
 
+    def calculate_init_wheel_step(self):
+        """Calculate initial step for spinning wheel as a function of time 
+        difference between mouse button pressed and released and y positions
+        of mouse."""
+        self.wheel_spin_factor = self.wheel_dif_time / self.wheel_dif_y
+        self.step = round(self.wheel_spin_factor * WHEEL_SPIN_MULTIPLIER)
+        if self.step < WHEEL_MIN_STEP:
+            self.step = WHEEL_MIN_STEP
+
     def push_wheel(self):
         """Control movement of wheel."""
-        self.step = round(self.step * 1.1)
-        print(self.step)
-        if self.step < 600:
+        self.step = round(self.step * WHEEL_DAMPENING)
+        if self.step < WHEEL_STOP_STEP:
             self.parent.after(self.step, self.spin_wheel)
-        else:
-            self.step = 50
-
 
 
 def main():
