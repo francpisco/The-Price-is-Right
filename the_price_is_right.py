@@ -7,7 +7,7 @@ import math
 
 WHEEL_SPIN_MULTIPLIER = 50_000
 WHEEL_STOP_STEP = 500
-WHEEL_DAMPENING = 1.03
+WHEEL_DAMPENING = 1.05
 
 class Game(tk.Frame):
     """GUI application for the price is right."""
@@ -15,6 +15,7 @@ class Game(tk.Frame):
     wheel_numbers = ('100', '15', '50', '95', '20', '5', '45', '60', '35',
                      '90', '65', '40', '55', '75', '30', '85', '70', '25',
                      '80', '10')
+    instructions = 'Play something something'
 
     def __init__(self, parent):
         """Initialize GUI."""
@@ -27,18 +28,26 @@ class Game(tk.Frame):
 
     def create_widgets(self):
         """Create widgets."""
-        self.play_button = tk.Button(self.parent, text='Roda!', 
-                                     command=self.on_play_button, 
-                                     height=38, width=10)
-        self.play_button.grid(row=0, column=0, sticky='W')
+        defaultbg = self.parent.cget('bg')
+        self.title_txt = tk.Label(self.parent, text='The Price is Right!',
+                                  anchor=tk.CENTER, bg=defaultbg,
+                                  font=('Arial', '32', 'bold'), fg='dark grey',
+                                  height=2, width=20)
+        self.title_txt.grid(row=0, column=0, columnspan=10, sticky='N')
 
         img = tk.PhotoImage(file="imgs/wheel_100.png")
         self.photo_lbl = tk.Label(self.parent, image=img, text='',
                                   borderwidth=0)
-        self.photo_lbl.grid(row=0, column=1, columnspan=10, sticky='W')
+        self.photo_lbl.grid(row=1, column=0, columnspan=10, sticky='W')
         self.photo_lbl.image = img
         self.photo_lbl.bind('<Button-1>', self.mouse_bt_pressed)
         self.photo_lbl.bind('<ButtonRelease-1>', self.mouse_bt_released)
+
+        self.instruction_txt = tk.Label(self.parent, text=self.instructions)
+        self.instruction_txt.grid(row=1, column=11, columnspan=1, sticky='W')
+
+        self.result_txt = tk.Label(self.parent, text='0')
+        self.result_txt.grid(row=2, column=0, columnspan=1, sticky='N')
 
     def create_wheel_imgs(self):
         """Load wheel images into tuple."""
@@ -48,10 +57,6 @@ class Game(tk.Frame):
             img = tk.PhotoImage(file=file_name)
             wheel_imgs_list.append(img)
         self.wheel_imgs = tuple(wheel_imgs_list)
-
-    def on_play_button(self):
-        """Action of spinning the wheel using a button."""
-        print("Spin!")
 
     def mouse_bt_pressed(self, event):
         """Callback function for clicking button on the wheel."""
@@ -64,17 +69,14 @@ class Game(tk.Frame):
         self.wheel_dif_time = time.time() - self.wheel_init_time
         print("Spin that wheel!!!", event.x, event.y)
         self.wheel_dif_y = event.y - self.wheel_init_y
-        self.calculate_init_wheel_step()
-        self.push_wheel()
+        if self.wheel_dif_y > 0.1:
+            self.calculate_init_wheel_step()
+            self.push_wheel()
 
     def spin_wheel(self):
         """Make wheel spin using sequence of images."""
         self.photo_lbl.config(image=self.wheel_imgs[self.wheel_position])
-        self.photo_lbl.image = self.wheel_imgs[self.wheel_position]
-        if self.wheel_position < (len(self.wheel_numbers) - 1):
-            self.wheel_position += 1
-        else:
-            self.wheel_position = 0
+        self.photo_lbl.image = self.wheel_imgs[self.wheel_position]        
         self.push_wheel()
 
     def calculate_init_wheel_step(self):
@@ -83,6 +85,7 @@ class Game(tk.Frame):
         of mouse."""
         self.wheel_spin_factor = self.wheel_dif_time / self.wheel_dif_y
         self.step = math.ceil(self.wheel_spin_factor * WHEEL_SPIN_MULTIPLIER)
+        
 
     def push_wheel(self):
         """Control movement of wheel."""
@@ -90,6 +93,15 @@ class Game(tk.Frame):
         print(self.step)
         if self.step < WHEEL_STOP_STEP:
             self.parent.after(self.step, self.spin_wheel)
+            if self.wheel_position < (len(self.wheel_numbers) - 1):
+                self.wheel_position += 1
+            else:
+                self.wheel_position = 0
+        else:
+            self.step = 0
+            self.result_txt.config(text=self
+                                   .wheel_numbers[self.wheel_position])
+
 
 
 def main():
