@@ -5,17 +5,25 @@ import tkinter as tk
 import time
 import math
 
-WHEEL_SPIN_MULTIPLIER = 50_000
-WHEEL_STOP_STEP = 500
-WHEEL_DAMPENING = 1.05
+
 
 class Game(tk.Frame):
     """GUI application for the price is right."""
 
-    wheel_numbers = ('100', '15', '50', '95', '20', '5', '45', '60', '35',
+    WHEEL_SPIN_MULTIPLIER = 50_000
+    WHEEL_STOP_STEP = 500
+    WHEEL_DAMPENING = 1.05
+    WHEEL_NUMBERS = ('100', '15', '50', '95', '20', '5', '45', '60', '35',
                      '90', '65', '40', '55', '75', '30', '85', '70', '25',
                      '80', '10')
-    instructions = 'Play something something'
+    INSTRUCTIONS = ('There are three players. Wins who gets closer to 100'
+                    ' without going over. Each player starts by spinning the'
+                    ' wheel once. After that, she can choose to spin it a'
+                    ' second time or not. Anyone who goes over 100 looses'
+                    ' immediately. In the end the player closer to 100 that'
+                    ' did not go over, wins!\n\n'
+                    'Statistics are presented to display who has the better'
+                    ' chance of whinning.')
 
     def __init__(self, parent):
         """Initialize GUI."""
@@ -43,8 +51,11 @@ class Game(tk.Frame):
         self.photo_lbl.bind('<Button-1>', self.mouse_bt_pressed)
         self.photo_lbl.bind('<ButtonRelease-1>', self.mouse_bt_released)
 
-        self.instruction_txt = tk.Label(self.parent, text=self.instructions)
-        self.instruction_txt.grid(row=1, column=11, columnspan=1, sticky='W')
+        self.instruction_txt = tk.Label(self.parent, text=self.INSTRUCTIONS, 
+                                        height=20, width=30, justify=tk.LEFT, 
+                                        font=('Arial', '12'), anchor='n', 
+                                        wraplength=200)
+        self.instruction_txt.grid(row=1, column=11, columnspan=1, sticky='N', ipadx=0)
 
         self.result_txt = tk.Label(self.parent, text='0')
         self.result_txt.grid(row=2, column=0, columnspan=1, sticky='N')
@@ -52,7 +63,7 @@ class Game(tk.Frame):
     def create_wheel_imgs(self):
         """Load wheel images into tuple."""
         wheel_imgs_list = []
-        for wheel_number in self.wheel_numbers:
+        for wheel_number in self.WHEEL_NUMBERS:
             file_name = f"imgs/wheel_{wheel_number}.png"
             img = tk.PhotoImage(file=file_name)
             wheel_imgs_list.append(img)
@@ -84,23 +95,24 @@ class Game(tk.Frame):
         difference between mouse button pressed and released and y positions
         of mouse."""
         self.wheel_spin_factor = self.wheel_dif_time / self.wheel_dif_y
-        self.step = math.ceil(self.wheel_spin_factor * WHEEL_SPIN_MULTIPLIER)
+        self.step = math.ceil(self.wheel_spin_factor 
+                              * self.WHEEL_SPIN_MULTIPLIER)
         
 
     def push_wheel(self):
         """Control movement of wheel."""
-        self.step = math.ceil(self.step * WHEEL_DAMPENING)
+        self.step = math.ceil(self.step * self.WHEEL_DAMPENING)
         print(self.step)
-        if self.step < WHEEL_STOP_STEP:
+        if self.step < self.WHEEL_STOP_STEP:
             self.parent.after(self.step, self.spin_wheel)
-            if self.wheel_position < (len(self.wheel_numbers) - 1):
+            if self.wheel_position < (len(self.WHEEL_NUMBERS) - 1):
                 self.wheel_position += 1
             else:
                 self.wheel_position = 0
         else:
             self.step = 0
             self.result_txt.config(text=self
-                                   .wheel_numbers[self.wheel_position])
+                                   .WHEEL_NUMBERS[self.wheel_position])
 
 
 
