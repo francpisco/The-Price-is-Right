@@ -64,30 +64,32 @@ class Game(tk.Frame):
     def create_instr_frame_widgets(self):
         """Create widgets inside instructions frame, to the right of the 
         photo."""
+
         self.instruction_txt = tk.Label(self.instr_frame, text=self.INSTRUCTIONS, 
                                         height=15, width=50, justify=tk.LEFT, 
                                         font=('Arial', '10'), anchor='n', 
                                         wraplength=370, borderwidth=1, relief='solid')
         self.instruction_txt.grid(row=0, column=0, columnspan=5)
 
-        self.first_spin_lbl = tk.Label(self.instr_frame, text='1st spin',
-                                       height=1, width=5)
-        self.first_spin_lbl.grid(row=1, column=1, sticky='w')
+        score_board_input = [
+            ('1st spin', 6, 1, 1), ('2nd spin', 6, 1, 2), ('total', 6, 1, 3),
+            ('1st player', 10, 2, 0), ('2nd player', 10, 3, 0), 
+            ('3rd player', 10, 4, 0)
+            ]
+        for text, width, row, column in score_board_input:
+            self.lbl = tk.Label(self.instr_frame, text=text, height=1, 
+                                width=width, font=('Arial', '10'), anchor='n', 
+                                borderwidth=1, relief='solid')
+            self.lbl.grid(row=row, column=column, sticky='w')
 
-        self.first_pl_txt = tk.Label(self.instr_frame, text='1st player', height=1, 
-                                     width=10, justify=tk.LEFT, font=('Arial', '10'), anchor='n', borderwidth=1, relief='solid')
-        self.first_pl_txt.grid(row=2, column=0, sticky='w')
-
-        self.first_p_1st_value = tk.Text(self.instr_frame, height=1, width=5)
-        self.first_p_1st_value.grid(row=2, column=1, sticky='w')
-
-        self.first_p_2nd_value = tk.Text(self.instr_frame, height=1, width=5)
-        self.first_p_2nd_value.grid(row=2, column=2, sticky='w')
-
-        self.first_p_total = tk.Text(self.instr_frame, height=1, width=5)
-        self.first_p_total.grid(row=2, column=3, sticky='w')
-
-        
+        self.score_txt_list = []
+        for r in range(3):
+            scores_row = []
+            for c in range(3):
+                txt = tk.Text(self.instr_frame, height=1, width=5)
+                txt.grid(row=r + 2, column=c + 1, sticky='w')
+                scores_row.append(txt)
+            self.score_txt_list.append(scores_row)
 
 
     def create_wheel_imgs(self):
@@ -140,7 +142,6 @@ class Game(tk.Frame):
             else:
                 self.wheel_position = 0
         else:
-            self.step = 0
             self.result_txt.config(text=self
                                    .WHEEL_NUMBERS[self.wheel_position])
 
