@@ -16,7 +16,8 @@ class Game(tk.Frame):
     WHEEL_NUMBERS = ('100', '15', '50', '95', '20', '5', '45', '60', '35',
                      '90', '65', '40', '55', '75', '30', '85', '70', '25',
                      '80', '10')
-    INSTRUCTIONS = ('There are three players. Wins who gets closer to 100'
+    INSTRUCTIONS = ('Instructions:\n\n'
+                    'There are three players. Wins who gets closer to 100'
                     ' without going over. Each player starts by spinning the'
                     ' wheel once. After that, she can choose to spin it a'
                     ' second time or not. Anyone who goes over 100 looses'
@@ -51,14 +52,43 @@ class Game(tk.Frame):
         self.photo_lbl.bind('<Button-1>', self.mouse_bt_pressed)
         self.photo_lbl.bind('<ButtonRelease-1>', self.mouse_bt_released)
 
-        self.instruction_txt = tk.Label(self.parent, text=self.INSTRUCTIONS, 
-                                        height=20, width=30, justify=tk.LEFT, 
-                                        font=('Arial', '12'), anchor='n', 
-                                        wraplength=200)
-        self.instruction_txt.grid(row=1, column=11, columnspan=1, sticky='N', ipadx=0)
+        self.instr_frame = tk.Frame(self.parent, height=50, width=50)
+        self.instr_frame.grid(row=1, column=11, columnspan=1, sticky='N', ipadx=0)
+
+        self.create_instr_frame_widgets()
 
         self.result_txt = tk.Label(self.parent, text='0')
         self.result_txt.grid(row=2, column=0, columnspan=1, sticky='N')
+
+        
+    def create_instr_frame_widgets(self):
+        """Create widgets inside instructions frame, to the right of the 
+        photo."""
+        self.instruction_txt = tk.Label(self.instr_frame, text=self.INSTRUCTIONS, 
+                                        height=15, width=50, justify=tk.LEFT, 
+                                        font=('Arial', '10'), anchor='n', 
+                                        wraplength=370, borderwidth=1, relief='solid')
+        self.instruction_txt.grid(row=0, column=0, columnspan=5)
+
+        self.first_spin_lbl = tk.Label(self.instr_frame, text='1st spin',
+                                       height=1, width=5)
+        self.first_spin_lbl.grid(row=1, column=1, sticky='w')
+
+        self.first_pl_txt = tk.Label(self.instr_frame, text='1st player', height=1, 
+                                     width=10, justify=tk.LEFT, font=('Arial', '10'), anchor='n', borderwidth=1, relief='solid')
+        self.first_pl_txt.grid(row=2, column=0, sticky='w')
+
+        self.first_p_1st_value = tk.Text(self.instr_frame, height=1, width=5)
+        self.first_p_1st_value.grid(row=2, column=1, sticky='w')
+
+        self.first_p_2nd_value = tk.Text(self.instr_frame, height=1, width=5)
+        self.first_p_2nd_value.grid(row=2, column=2, sticky='w')
+
+        self.first_p_total = tk.Text(self.instr_frame, height=1, width=5)
+        self.first_p_total.grid(row=2, column=3, sticky='w')
+
+        
+
 
     def create_wheel_imgs(self):
         """Load wheel images into tuple."""
@@ -120,7 +150,7 @@ def main():
     """Start here."""
     root = tk.Tk()
     root.title("The Price is Right")
-    root.geometry('1200x800')
+    root.geometry('1200x760')
     game = Game(root)
     root.mainloop()
 
