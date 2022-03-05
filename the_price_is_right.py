@@ -31,9 +31,12 @@ class Game(tk.Frame):
         super().__init__(parent)
         self.parent = parent
         self.wheel_position = 0
+        self.current_player = 0  # 0 - 1st player, 1 - 2nd, 2 - 3rd 
+        self.current_spin = 0  # 0 - 1sr, 1 - 2nd
 
         self.create_widgets()
         self.create_wheel_imgs()
+        self.game_play_txt.insert('1.0', '1st Player turn')
 
     def create_widgets(self):
         """Create widgets."""
@@ -57,37 +60,39 @@ class Game(tk.Frame):
 
         self.create_instr_frame_widgets()
 
-        self.result_txt = tk.Label(self.parent, text='0')
-        self.result_txt.grid(row=2, column=0, columnspan=1, sticky='N')
-
         
     def create_instr_frame_widgets(self):
         """Create widgets inside instructions frame, to the right of the 
         photo."""
 
-        self.instruction_txt = tk.Label(self.instr_frame, text=self.INSTRUCTIONS, 
+        self.instruction_lbl = tk.Label(self.instr_frame, text=self.INSTRUCTIONS, 
                                         height=15, width=50, justify=tk.LEFT, 
                                         font=('Arial', '10'), anchor='n', 
                                         wraplength=370, borderwidth=1, relief='solid')
-        self.instruction_txt.grid(row=0, column=0, columnspan=5)
+        self.instruction_lbl.grid(row=0, column=0, columnspan=5)
+
+        defaultbg = self.instr_frame.cget('bg')
+        self.game_play_txt = tk.Text(self.instr_frame, width=30, height=1, 
+                                     bg=defaultbg, borderwidth=0, font=('30'), fg='green')
+        self.game_play_txt.grid(row=1, column=0, columnspan=5, padx=30, pady=30)
 
         score_board_input = [
-            ('1st spin', 6, 1, 1), ('2nd spin', 6, 1, 2), ('total', 6, 1, 3),
-            ('1st player', 10, 2, 0), ('2nd player', 10, 3, 0), 
-            ('3rd player', 10, 4, 0)
+            ('1st spin', 8, 2, 1), ('2nd spin', 8, 2, 2), ('total', 8, 2, 3),
+            ('1st player', 10, 3, 0), ('2nd player', 10, 4, 0), 
+            ('3rd player', 10, 5, 0)
             ]
         for text, width, row, column in score_board_input:
             self.lbl = tk.Label(self.instr_frame, text=text, height=1, 
                                 width=width, font=('Arial', '10'), anchor='n', 
                                 borderwidth=1, relief='solid')
-            self.lbl.grid(row=row, column=column, sticky='w')
+            self.lbl.grid(row=row, column=column, sticky='w', pady=5)
 
         self.score_txt_list = []
         for r in range(3):
             scores_row = []
             for c in range(3):
                 txt = tk.Text(self.instr_frame, height=1, width=5)
-                txt.grid(row=r + 2, column=c + 1, sticky='w')
+                txt.grid(row=r + 3, column=c + 1, sticky='w')
                 scores_row.append(txt)
             self.score_txt_list.append(scores_row)
 
@@ -142,8 +147,20 @@ class Game(tk.Frame):
             else:
                 self.wheel_position = 0
         else:
-            self.result_txt.config(text=self
-                                   .WHEEL_NUMBERS[self.wheel_position])
+            self.proceed_game()
+
+    def proceed_game(self):
+        """Control flow of game after 1st spin."""
+        self.score_txt_list[self.current_player][self.current_spin]\
+            .delete('1.0', 'end')
+        self.score_txt_list[self.current_player][self.current_spin]\
+            .insert('1.0', self.WHEEL_NUMBERS[self.wheel_position])
+        if self.current_spin == 0:
+            self.ask_2nd_spin()
+
+    def ask_2nd_spin(self):
+        """Ask player if she wants to spin a second time."""
+        print("Hello")
 
 
 
