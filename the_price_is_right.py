@@ -160,14 +160,37 @@ class Game(tk.Frame):
             .insert('1.0', self.WHEEL_NUMBERS[self.wheel_position])
         if self.current_spin == 0:
             self.ask_2nd_spin()
+        else:
+            self.display_total()
+            self.current_player += 1
+            self.current_spin = 0
+
+    def display_total(self):
+        """Display total at the end of a player's turn."""
+        self.score_txt_list[self.current_player][2] \
+            .insert('1.0', self.player_scores[self.current_player])
 
     def ask_2nd_spin(self):
         """Ask player if she wants to spin a second time."""
         self.popup_win = tk.Toplevel()
         self.popup_win.wm_title('Play again?')
-        message = f"Your current score is {self.player_scores[self.current_player]}"
+        parent_x = self.parent.winfo_x()
+        parent_y = self.parent.winfo_y()
+        self.popup_win.geometry(f'520x360+{parent_x + 200}+{parent_y + 200}')
+        message = ('Your current score is '
+                   f'{self.player_scores[self.current_player]}!\n'
+                   'Do you want to play again?')
         score_lbl = tk.Label(self.popup_win, text=message)
         score_lbl.grid(row=0, column=0)
+        yes_button = tk.Button(self.popup_win, text='yes', 
+                               command=self.second_spin)
+        yes_button.grid(row=1, column=0)
+
+    def second_spin(self):
+        """Action to take when player wants to spin the wheel a second time."""
+        self.current_spin = 1
+        self.popup_win.destroy()
+        
 
 
 
