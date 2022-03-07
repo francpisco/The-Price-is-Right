@@ -33,6 +33,7 @@ class Game(tk.Frame):
         self.wheel_position = 0
         self.current_player = 0  # 0 - 1st player, 1 - 2nd, 2 - 3rd 
         self.current_spin = 0  # 0 - 1sr, 1 - 2nd
+        self.player_scores = [0, 0, 0]
 
         self.create_widgets()
         self.create_wheel_imgs()
@@ -151,16 +152,22 @@ class Game(tk.Frame):
 
     def proceed_game(self):
         """Control flow of game after 1st spin."""
-        self.score_txt_list[self.current_player][self.current_spin]\
+        self.player_scores[self.current_player] += (
+            int(self.WHEEL_NUMBERS[self.wheel_position]))
+        self.score_txt_list[self.current_player][self.current_spin] \
             .delete('1.0', 'end')
-        self.score_txt_list[self.current_player][self.current_spin]\
+        self.score_txt_list[self.current_player][self.current_spin] \
             .insert('1.0', self.WHEEL_NUMBERS[self.wheel_position])
         if self.current_spin == 0:
             self.ask_2nd_spin()
 
     def ask_2nd_spin(self):
         """Ask player if she wants to spin a second time."""
-        print("Hello")
+        self.popup_win = tk.Toplevel()
+        self.popup_win.wm_title('Play again?')
+        message = f"Your current score is {self.player_scores[self.current_player]}"
+        score_lbl = tk.Label(self.popup_win, text=message)
+        score_lbl.grid(row=0, column=0)
 
 
 
