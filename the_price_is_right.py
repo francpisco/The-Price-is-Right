@@ -39,17 +39,16 @@ class Game(tk.Frame):
 
         self.create_widgets()
         self.create_wheel_imgs()
-        self.game_play_txt.insert('1.0', '1st Player turn')
         self.introduction_box()
 
     def create_widgets(self):
         """Create widgets."""
         defaultbg = self.parent.cget('bg')
-        self.title_txt = tk.Label(self.parent, text='The Price is Right!',
+        self.title_lbl = tk.Label(self.parent, text='The Price is Right!',
                                   anchor=tk.CENTER, bg=defaultbg,
                                   font=('Arial', '32', 'bold'), fg='dark grey',
                                   height=2, width=20)
-        self.title_txt.grid(row=0, column=0, columnspan=10, sticky='N')
+        self.title_lbl.grid(row=0, column=0, columnspan=10, sticky='N')
 
         img = tk.PhotoImage(file="imgs/wheel_100.png")
         self.photo_lbl = tk.Label(self.parent, image=img, text='',
@@ -89,6 +88,7 @@ class Game(tk.Frame):
         self.parent.attributes('-topmost', 'true')
         self.intro_box.destroy()
         self.wheel_active = True
+        self.game_play_txt.insert('1.0', '1st Player, spin the wheel!')
         self.parent.attributes('-topmost', 'false')
 
         
@@ -186,11 +186,22 @@ class Game(tk.Frame):
             self.ask_2nd_spin()
         elif self.current_player < 2:
             self.display_total()
+            self.update_game_txt()
             self.current_player += 1
             self.current_spin = 0
         else:
             self.display_total()
+            self.update_game_txt()
             self.end_game()
+
+    def display_game_popup(self):
+        """Display a popup at the end of each player's turn."""
+        self.game_popup = tk.Toplevel()
+        self.game_popup.wm_title('Player total')
+
+
+        
+        
 
     def display_players_scores(self):
         """Display players scores on scoreboard as wheel stops."""
@@ -203,8 +214,8 @@ class Game(tk.Frame):
 
     def display_total(self):
         """Display total at the end of a player's turn."""
-        self.score_txt_list[self.current_player][2] \
-            .insert('1.0', self.player_scores[self.current_player])
+        player_total = self.player_scores[self.current_player]
+        self.score_txt_list[self.current_player][2].insert('1.0', player_total)
 
     def ask_2nd_spin(self):
         """Ask player if she wants to spin a second time."""
@@ -235,6 +246,7 @@ class Game(tk.Frame):
     def no_second_spin(self):
         """Action to take when player does not want to play again."""
         self.display_total()
+        self.update_game_txt()
         self.popup_win.destroy()
         if self.current_player >= 2:
             self.end_game()
@@ -258,6 +270,16 @@ class Game(tk.Frame):
         for i in range(3):
             if self.player_scores[i] > self.player_scores[self.winner]:
                 self.winner = i
+
+    def update_game_txt(self):
+        """Update text box with small instructions about game."""
+        self.game_play_txt.delete('1.0', 'end')
+        player_total = self.player_scores[self.current_player]
+        color = 'green'
+        if player_total > 100:
+            color = 'red'
+        self.game_play_txt.config(fg=color)
+        self.game_play_txt.insert('1.0', f'Player total: {player_total}!')
 
 
 def main():
