@@ -35,11 +35,12 @@ class Game(tk.Frame):
         self.current_player = 0  # 0 - 1st player, 1 - 2nd, 2 - 3rd 
         self.current_spin = 0  # 0 - 1sr, 1 - 2nd
         self.player_scores = [0, 0, 0]
-        self.wheel_active = True
+        self.wheel_active = False
 
         self.create_widgets()
         self.create_wheel_imgs()
         self.game_play_txt.insert('1.0', '1st Player turn')
+        self.introduction_box()
 
     def create_widgets(self):
         """Create widgets."""
@@ -62,6 +63,33 @@ class Game(tk.Frame):
         self.instr_frame.grid(row=1, column=11, columnspan=1, sticky='N', ipadx=0)
 
         self.create_instr_frame_widgets()
+
+    def introduction_box(self):
+        """Create an introduction pop up box to display instructions and
+        introduce game."""
+        self.intro_box = tk.Toplevel()
+        self.intro_box.wm_title('Introduction')
+        parent_x = self.parent.winfo_x()
+        parent_y = self.parent.winfo_y()
+        self.intro_box.geometry(f'520x360+{parent_x + 200}+{parent_y + 200}')
+
+        inst_lbl = tk.Label(self.intro_box, text=self.INSTRUCTIONS, 
+                                        height=15, width=50, justify=tk.LEFT, 
+                                        font=('Arial', '10'), anchor='n', 
+                                        wraplength=370, borderwidth=1, relief='solid')
+        inst_lbl.grid(row=0, column=0, columnspan=5)
+
+        play_btn = tk.Button(self.intro_box, text='Play', 
+                            command=self.start_game)
+        play_btn.grid(row=1, column=0)
+        self.intro_box.attributes('-topmost', 'true')
+
+    def start_game(self):
+        """Close introduction box and start game."""
+        self.parent.attributes('-topmost', 'true')
+        self.intro_box.destroy()
+        self.wheel_active = True
+        self.parent.attributes('-topmost', 'false')
 
         
     def create_instr_frame_widgets(self):
@@ -230,7 +258,6 @@ class Game(tk.Frame):
         for i in range(3):
             if self.player_scores[i] > self.player_scores[self.winner]:
                 self.winner = i
-        print(self.winner)
 
 
 def main():
