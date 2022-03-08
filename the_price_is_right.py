@@ -216,9 +216,22 @@ class Game(tk.Frame):
 
     def end_game(self):
         """After all three players have played display winner."""
+        self.determine_winner()
         self.wheel_active = False
         self.game_play_txt.delete('1.0', 'end')
-        self.game_play_txt.insert('1.0', 'Winner is ')
+        self.game_play_txt.insert('1.0', f'Winner is player {self.winner + 1}')
+
+    def determine_winner(self):
+        """Determine who is the winner."""
+        self.winner = 0  # player index
+        for score in self.player_scores:  # Check who went over 100
+            if score > 100:
+                score = 0
+        for i in range(3):
+            if self.player_scores[i] > self.player_scores[self.winner]:
+                self.winner = i
+        print(self.winner)
+
 
 def main():
     """Start here."""
