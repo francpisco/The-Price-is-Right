@@ -12,7 +12,8 @@ class Game(tk.Frame):
 
     WHEEL_SPIN_MULTIPLIER = 50_000
     WHEEL_STOP_STEP = 500
-    WHEEL_DAMPENING = 1.05
+    WHEEL_DAMPENING = 1.2
+    MIN_PUSH_PIXELS_Y = 20
     WHEEL_NUMBERS = ('100', '15', '50', '95', '20', '5', '45', '60', '35',
                      '90', '65', '40', '55', '75', '30', '85', '70', '25',
                      '80', '10')
@@ -34,6 +35,7 @@ class Game(tk.Frame):
         self.current_player = 0  # 0 - 1st player, 1 - 2nd, 2 - 3rd 
         self.current_spin = 0  # 0 - 1sr, 1 - 2nd
         self.player_scores = [0, 0, 0]
+        self.wheel_active = True
 
         self.create_widgets()
         self.create_wheel_imgs()
@@ -110,15 +112,13 @@ class Game(tk.Frame):
     def mouse_bt_pressed(self, event):
         """Callback function for clicking button on the wheel."""
         self.wheel_init_time = time.time()
-        print("SSpinnig!", event.x, event.y)
         self.wheel_init_y = event.y
     
     def mouse_bt_released(self, event):
         """Callback function for release button on wheel."""
         self.wheel_dif_time = time.time() - self.wheel_init_time
-        print("Spin that wheel!!!", event.x, event.y)
         self.wheel_dif_y = event.y - self.wheel_init_y
-        if self.wheel_dif_y > 0.1:
+        if self.wheel_dif_y > self.MIN_PUSH_PIXELS_Y and self.wheel_active:
             self.calculate_init_wheel_step()
             self.push_wheel()
 
@@ -151,19 +151,27 @@ class Game(tk.Frame):
             self.proceed_game()
 
     def proceed_game(self):
-        """Control flow of game after 1st spin."""
+        """Control flow of game after 1st spin. What happens after wheel 
+        stops"""
+        self.display_players_scores()      
+        if self.current_spin == 0:
+            self.ask_2nd_spin()
+        elif self.current_player < 2:
+            self.display_total()
+            self.current_player += 1
+            self.current_spin = 0
+        else:
+            self.display_total()
+            self.end_game()
+
+    def display_players_scores(self):
+        """Display players scores on scoreboard as wheel stops."""
         self.player_scores[self.current_player] += (
             int(self.WHEEL_NUMBERS[self.wheel_position]))
         self.score_txt_list[self.current_player][self.current_spin] \
             .delete('1.0', 'end')
         self.score_txt_list[self.current_player][self.current_spin] \
             .insert('1.0', self.WHEEL_NUMBERS[self.wheel_position])
-        if self.current_spin == 0:
-            self.ask_2nd_spin()
-        else:
-            self.display_total()
-            self.current_player += 1
-            self.current_spin = 0
 
     def display_total(self):
         """Display total at the end of a player's turn."""
@@ -172,6 +180,7 @@ class Game(tk.Frame):
 
     def ask_2nd_spin(self):
         """Ask player if she wants to spin a second time."""
+        self.wheel_active = False
         self.popup_win = tk.Toplevel()
         self.popup_win.wm_title('Play again?')
         parent_x = self.parent.winfo_x()
@@ -182,17 +191,34 @@ class Game(tk.Frame):
                    'Do you want to play again?')
         score_lbl = tk.Label(self.popup_win, text=message)
         score_lbl.grid(row=0, column=0)
-        yes_button = tk.Button(self.popup_win, text='yes', 
-                               command=self.second_spin)
-        yes_button.grid(row=1, column=0)
+        yes_btn = tk.Button(self.popup_win, text='yes', 
+                            command=self.yes_second_spin)
+        yes_btn.grid(row=1, column=0)
+        no_btn = tk.Button(self.popup_win, text='no',
+                           command=self.no_second_spin)
+        no_btn.grid(row=1, column=1)
 
-    def second_spin(self):
+    def yes_second_spin(self):
         """Action to take when player wants to spin the wheel a second time."""
         self.current_spin = 1
         self.popup_win.destroy()
+        self.wheel_active = True
         
+    def no_second_spin(self):
+        """Action to take when player does not want to play again."""
+        self.display_total()
+        self.popup_win.destroy()
+        if self.current_player >= 2:
+            self.end_game()
+        else:
+            self.wheel_active = True
+            self.current_player += 1
 
-
+    def end_game(self):
+        """After all three players have played display winner."""
+        self.wheel_active = False
+        self.game_play_txt.delete('1.0', 'end')
+        self.game_play_txt.insert('1.0', 'Winner is ')
 
 def main():
     """Start here."""
