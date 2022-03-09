@@ -36,6 +36,7 @@ class Game(tk.Frame):
         self.current_spin = 0  # 0 - 1sr, 1 - 2nd
         self.player_scores = [0, 0, 0]
         self.wheel_active = False
+        self.show_player_total = False
 
         self.create_widgets()
         self.create_wheel_imgs()
@@ -186,14 +187,16 @@ class Game(tk.Frame):
             self.ask_2nd_spin()
         elif self.current_player < 2:
             self.display_total()
-            self.update_game_txt()
+            self.show_player_total = True
             self.display_game_popup()
+            self.update_game_txt()
             self.current_player += 1
             self.current_spin = 0
         else:
             self.display_total()
             self.display_game_popup()
             self.update_game_txt()
+            self.current_player += 1
             self.end_game()
 
     def display_game_popup(self):
@@ -204,7 +207,7 @@ class Game(tk.Frame):
         parent_y = self.parent.winfo_y()
         self.game_popup.geometry(f'520x360+{parent_x + 200}+{parent_y + 200}')
 
-        info_txt = (f'Player {self.current_player} total:'
+        info_txt = (f'Player {self.current_player + 1} total:'
                     f' {self.player_scores[self.current_player]}')
         info_lbl = tk.Label(self.game_popup, text=info_txt, height=15, 
                             width=50, justify=tk.LEFT, font=('Arial', '10'),
@@ -218,10 +221,15 @@ class Game(tk.Frame):
         play_btn = tk.Button(self.game_popup, text=btn_txt, 
                              command=self.continue_game)
         play_btn.grid(row=1, column=0)
+        self.wheel_active = False
 
     def continue_game(self):
         """Close game pop up window and continue game."""
         self.game_popup.destroy()
+        self.show_player_total = False
+        if self.current_player < 3:
+            self.wheel_active = True
+            self.update_game_txt()
         
 
     def display_players_scores(self):
@@ -267,14 +275,15 @@ class Game(tk.Frame):
     def no_second_spin(self):
         """Action to take when player does not want to play again."""
         self.display_total()
+        self.show_player_total = True
         self.update_game_txt()
         self.popup_win.destroy()
         self.display_game_popup()
+        self.current_player += 1
         if self.current_player >= 2:
             self.end_game()
         else:
             self.wheel_active = True
-            self.current_player += 1
 
     def end_game(self):
         """After all three players have played display winner."""
@@ -286,9 +295,9 @@ class Game(tk.Frame):
     def determine_winner(self):
         """Determine who is the winner."""
         self.winner = 0  # player index
-        for score in self.player_scores:  # Check who went over 100
-            if score > 100:
-                score = 0
+        for i in range(3):  # Check who went over 100
+            if self.player_scores[i] > 100:
+                self.player_scores[i] = 0
         for i in range(3):
             if self.player_scores[i] > self.player_scores[self.winner]:
                 self.winner = i
@@ -298,10 +307,14 @@ class Game(tk.Frame):
         self.game_play_txt.delete('1.0', 'end')
         player_total = self.player_scores[self.current_player]
         color = 'green'
-        if player_total > 100:
+        if player_total > 100 and self.show_player_total:
             color = 'red'
         self.game_play_txt.config(fg=color)
-        self.game_play_txt.insert('1.0', f'Player total: {player_total}!')
+        if self.show_player_total:
+            self.game_play_txt.insert('1.0', f'Player total: {player_total}!')
+        else:
+            self.game_play_txt. \
+                insert('1.0', f'Player {self.current_player + 1} spin!')
 
 
 def main():
