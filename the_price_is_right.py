@@ -31,15 +31,18 @@ class Game(tk.Frame):
         """Initialize GUI."""
         super().__init__(parent)
         self.parent = parent
+        self.start()
+        self.create_widgets()
+        self.create_wheel_imgs()
+        
+    def start(self):
+        """Start a game."""
         self.wheel_position = 0
         self.current_player = 0  # 0 - 1st player, 1 - 2nd, 2 - 3rd 
         self.current_spin = 0  # 0 - 1sr, 1 - 2nd
         self.player_scores = [0, 0, 0]
         self.wheel_active = False
         self.show_player_total = False
-
-        self.create_widgets()
-        self.create_wheel_imgs()
         self.introduction_box()
 
     def create_widgets(self):
@@ -89,6 +92,7 @@ class Game(tk.Frame):
         self.parent.attributes('-topmost', 'true')
         self.intro_box.destroy()
         self.wheel_active = True
+        self.game_play_txt.delete('1.0', 'end')
         self.game_play_txt.insert('1.0', '1st Player, spin the wheel!')
         self.parent.attributes('-topmost', 'false')
 
@@ -127,6 +131,24 @@ class Game(tk.Frame):
                 txt.grid(row=r + 3, column=c + 1, sticky='w')
                 scores_row.append(txt)
             self.score_txt_list.append(scores_row)
+
+        self.play_again_btn = tk.Button(self.instr_frame, text='Play again', 
+                                        state=tk.DISABLED,
+                                        command=self.play_again)
+        self.play_again_btn.grid(row=6, column=1)
+
+    def play_again(self):
+        """Actions to take to start over."""
+        self.start()
+        self.photo_lbl.config(image=self.wheel_imgs[self.wheel_position])
+        self.photo_lbl.image = self.wheel_imgs[self.wheel_position]
+        self.reset_scores()
+
+    def reset_scores(self):
+        """Delete board scores from previous game."""
+        for r in range(3):
+            for c in range(3):
+                self.score_txt_list[r][c].delete('1.0', 'end')
 
 
     def create_wheel_imgs(self):
@@ -291,6 +313,7 @@ class Game(tk.Frame):
         self.wheel_active = False
         self.game_play_txt.delete('1.0', 'end')
         self.game_play_txt.insert('1.0', f'Winner is player {self.winner + 1}')
+        self.play_again_btn.config(state=tk.NORMAL)
 
     def determine_winner(self):
         """Determine who is the winner."""
