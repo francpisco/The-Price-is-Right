@@ -72,10 +72,10 @@ class Game(tk.Frame):
         parent_y = self.parent.winfo_y()
         self.intro_box.geometry(f'520x360+{parent_x + 200}+{parent_y + 200}')
 
-        inst_lbl = tk.Label(self.intro_box, text=self.INSTRUCTIONS, 
-                                        height=15, width=50, justify=tk.LEFT, 
-                                        font=('Arial', '10'), anchor='n', 
-                                        wraplength=370, borderwidth=1, relief='solid')
+        inst_lbl = tk.Label(self.intro_box, text=self.INSTRUCTIONS, height=15, 
+                            width=50, justify=tk.LEFT, font=('Arial', '10'),
+                            anchor='n', wraplength=370, borderwidth=1,
+                            relief='solid')
         inst_lbl.grid(row=0, column=0, columnspan=5)
 
         play_btn = tk.Button(self.intro_box, text='Play', 
@@ -187,10 +187,12 @@ class Game(tk.Frame):
         elif self.current_player < 2:
             self.display_total()
             self.update_game_txt()
+            self.display_game_popup()
             self.current_player += 1
             self.current_spin = 0
         else:
             self.display_total()
+            self.display_game_popup()
             self.update_game_txt()
             self.end_game()
 
@@ -198,9 +200,28 @@ class Game(tk.Frame):
         """Display a popup at the end of each player's turn."""
         self.game_popup = tk.Toplevel()
         self.game_popup.wm_title('Player total')
+        parent_x = self.parent.winfo_x()
+        parent_y = self.parent.winfo_y()
+        self.game_popup.geometry(f'520x360+{parent_x + 200}+{parent_y + 200}')
 
+        info_txt = (f'Player {self.current_player} total:'
+                    f' {self.player_scores[self.current_player]}')
+        info_lbl = tk.Label(self.game_popup, text=info_txt, height=15, 
+                            width=50, justify=tk.LEFT, font=('Arial', '10'),
+                            anchor='n', borderwidth=1, relief='solid')
+        info_lbl.grid(row=0, column=0, columnspan=1)
 
-        
+        if self.current_player < 2:
+            btn_txt = f'Player {self.current_player + 2}, play!'
+        else:
+            btn_txt = 'Continue'
+        play_btn = tk.Button(self.game_popup, text=btn_txt, 
+                             command=self.continue_game)
+        play_btn.grid(row=1, column=0)
+
+    def continue_game(self):
+        """Close game pop up window and continue game."""
+        self.game_popup.destroy()
         
 
     def display_players_scores(self):
@@ -248,6 +269,7 @@ class Game(tk.Frame):
         self.display_total()
         self.update_game_txt()
         self.popup_win.destroy()
+        self.display_game_popup()
         if self.current_player >= 2:
             self.end_game()
         else:
