@@ -143,6 +143,7 @@ class Game(tk.Frame):
         self.photo_lbl.config(image=self.wheel_imgs[self.wheel_position])
         self.photo_lbl.image = self.wheel_imgs[self.wheel_position]
         self.reset_scores()
+        self.play_again_btn.config(state=tk.DISABLED)
 
     def reset_scores(self):
         """Delete board scores from previous game."""
@@ -312,18 +313,23 @@ class Game(tk.Frame):
         self.determine_winner()
         self.wheel_active = False
         self.game_play_txt.delete('1.0', 'end')
-        self.game_play_txt.insert('1.0', f'Winner is player {self.winner + 1}')
+        if len(self.winners) == 1:
+            text = f'Winner is player {self.winners[0] + 1}'
+        else:
+            text = 'There is a tie!'
+        self.game_play_txt.insert('1.0', text)
         self.play_again_btn.config(state=tk.NORMAL)
 
     def determine_winner(self):
-        """Determine who is the winner."""
-        self.winner = 0  # player index
-        for i in range(3):  # Check who went over 100
+        """Determine who is the winner or winners."""
+        for i in range(len(self.player_scores)):  # Check who went over 100
             if self.player_scores[i] > 100:
                 self.player_scores[i] = 0
-        for i in range(3):
-            if self.player_scores[i] > self.player_scores[self.winner]:
-                self.winner = i
+        winner_score = max(self.player_scores)
+        self.winners = []
+        for i in range(len(self.player_scores)):
+            if self.player_scores[i] == winner_score:
+                self.winners.append(i)
 
     def update_game_txt(self):
         """Update text box with small instructions about game."""
