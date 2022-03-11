@@ -4,6 +4,7 @@ to try to get as close as possible to 100 points without going over."""
 import tkinter as tk
 import time
 import math
+import sys
 
 
 
@@ -132,17 +133,12 @@ class Game(tk.Frame):
                 scores_row.append(txt)
             self.score_txt_list.append(scores_row)
 
-        self.play_again_btn = tk.Button(self.instr_frame, text='Play again', 
-                                        state=tk.DISABLED,
-                                        command=self.play_again)
-        self.play_again_btn.grid(row=6, column=1)
-
     def play_again(self):
         """Actions to take to start over."""
+        self.game_over_popup.destroy()
         self.start()
         self.update_wheel_img()
         self.reset_scores()
-        self.play_again_btn.config(state=tk.DISABLED)
 
     def reset_scores(self):
         """Delete board scores from previous game."""
@@ -214,6 +210,7 @@ class Game(tk.Frame):
         self.step = math.ceil(self.step * self.WHEEL_DAMPENING)       
         self.spin_wheel()
 
+
     def popup_wheel_turn(self):
         """Display a popup warning that the wheel did not make a full turn."""
         self.turn_popup = tk.Toplevel()
@@ -257,7 +254,6 @@ class Game(tk.Frame):
             self.current_player += 1
         else:
             self.display_total()
-            self.display_game_popup()
             self.update_game_txt()
             self.end_game()
 
@@ -339,8 +335,8 @@ class Game(tk.Frame):
         self.display_total()
         self.show_player_total = True
         self.popup_win.destroy()
-        self.display_game_popup()
         if self.current_player < 2:
+            self.display_game_popup()
             self.update_game_txt()
             self.current_player += 1
         else:   
@@ -358,7 +354,7 @@ class Game(tk.Frame):
         else:
             text = 'There is a tie!'
         self.game_play_txt.insert('1.0', text)
-        self.play_again_btn.config(state=tk.NORMAL)
+        self.game_over_popup()
 
     def determine_winner(self):
         """Determine who is the winner or winners."""
@@ -385,6 +381,23 @@ class Game(tk.Frame):
             self.game_play_txt. \
                 insert('1.0', f'Player {self.current_player + 1} spin!')
 
+    def game_over_popup(self):
+        """Display a popup at the end of the game, displaying winner, and 2 
+        options: play again and exit"""
+        self.popup_gameover = tk.Toplevel()
+        self.popup_gameover.wm_title('Play again?')
+        parent_x = self.parent.winfo_x()
+        parent_y = self.parent.winfo_y()
+        self.popup_gameover.geometry(f'520x360+{parent_x + 200}+{parent_y + 200}')
+        message = ('Winner is')
+        message_lbl = tk.Label(self.popup_gameover, text=message)
+        message_lbl.grid(row=0, column=0)
+        play_btn = tk.Button(self.popup_gameover, text='Play again', 
+                            command=self.play_again)
+        play_btn.grid(row=1, column=0)
+        exit_btn = tk.Button(self.popup_gameover, text='exit',
+                           command=sys.exit)
+        exit_btn.grid(row=1, column=1)
 
 def main():
     """Start here."""
