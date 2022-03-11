@@ -36,6 +36,7 @@ class Game(tk.Frame):
         
     def start(self):
         """Start a game."""
+        self.game_finished = False
         self.wheel_position = 0
         self.current_player = 0  # 0 - 1st player, 1 - 2nd, 2 - 3rd 
         self.current_spin = 0  # 0 - 1sr, 1 - 2nd
@@ -166,6 +167,8 @@ class Game(tk.Frame):
     
     def mouse_bt_released(self, event):
         """Callback function for release button on wheel."""
+        if self.wheel_init_y == event.y:
+            return
         self.wheel_dif_time = time.time() - self.wheel_init_time
         self.wheel_dif_y = event.y - self.wheel_init_y
         self.calculate_init_wheel_step()
@@ -250,13 +253,12 @@ class Game(tk.Frame):
             self.show_player_total = True
             self.display_game_popup()
             self.update_game_txt()
-            self.current_player += 1
             self.current_spin = 0
+            self.current_player += 1
         else:
             self.display_total()
             self.display_game_popup()
             self.update_game_txt()
-            self.current_player += 1
             self.end_game()
 
     def display_game_popup(self):
@@ -287,7 +289,7 @@ class Game(tk.Frame):
         """Close game pop up window and continue game."""
         self.game_popup.destroy()
         self.show_player_total = False
-        if self.current_player < 3:
+        if not self.game_finished:
             self.wheel_active = True
             self.update_game_txt()
         
@@ -336,18 +338,19 @@ class Game(tk.Frame):
         """Action to take when player does not want to play again."""
         self.display_total()
         self.show_player_total = True
-        self.update_game_txt()
         self.popup_win.destroy()
         self.display_game_popup()
-        self.current_player += 1
-        if self.current_player >= 2:
+        if self.current_player < 2:
+            self.update_game_txt()
+            self.current_player += 1
+        else:   
             self.end_game()
-        else:
-            self.wheel_active = True
+        
 
     def end_game(self):
         """After all three players have played display winner."""
         self.determine_winner()
+        self.game_finished = True
         self.wheel_active = False
         self.game_play_txt.delete('1.0', 'end')
         if len(self.winners) == 1:
