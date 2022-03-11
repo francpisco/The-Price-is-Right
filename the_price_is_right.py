@@ -12,8 +12,7 @@ class Game(tk.Frame):
 
     WHEEL_SPIN_MULTIPLIER = 50_000
     WHEEL_STOP_STEP = 500
-    WHEEL_DAMPENING = 1.2
-    MIN_PUSH_PIXELS_Y = 20
+    WHEEL_DAMPENING = 1.1
     WHEEL_NUMBERS = ('100', '15', '50', '95', '20', '5', '45', '60', '35',
                      '90', '65', '40', '55', '75', '30', '85', '70', '25',
                      '80', '10')
@@ -140,8 +139,7 @@ class Game(tk.Frame):
     def play_again(self):
         """Actions to take to start over."""
         self.start()
-        self.photo_lbl.config(image=self.wheel_imgs[self.wheel_position])
-        self.photo_lbl.image = self.wheel_imgs[self.wheel_position]
+        self.update_wheel_img()
         self.reset_scores()
         self.play_again_btn.config(state=tk.DISABLED)
 
@@ -170,15 +168,16 @@ class Game(tk.Frame):
         """Callback function for release button on wheel."""
         self.wheel_dif_time = time.time() - self.wheel_init_time
         self.wheel_dif_y = event.y - self.wheel_init_y
-        if self.wheel_dif_y > self.MIN_PUSH_PIXELS_Y and self.wheel_active:
-            self.calculate_init_wheel_step()
-            self.push_wheel()
+        self.calculate_init_wheel_step()
+        if self.step < self.WHEEL_STOP_STEP and self.wheel_active:
+            self.initial_wheel_pos = self.wheel_position
+            self.complete_Wheel_turn = False
+            self.spin_wheel()
 
-    def spin_wheel(self):
+    def update_wheel_img(self):
         """Make wheel spin using sequence of images."""
         self.photo_lbl.config(image=self.wheel_imgs[self.wheel_position])
-        self.photo_lbl.image = self.wheel_imgs[self.wheel_position]        
-        self.push_wheel()
+        self.photo_lbl.image = self.wheel_imgs[self.wheel_position]         
 
     def calculate_init_wheel_step(self):
         """Calculate initial step for spinning wheel as a function of time 
@@ -188,19 +187,57 @@ class Game(tk.Frame):
         self.step = math.ceil(self.wheel_spin_factor 
                               * self.WHEEL_SPIN_MULTIPLIER)
         
-
-    def push_wheel(self):
-        """Control movement of wheel."""
-        self.step = math.ceil(self.step * self.WHEEL_DAMPENING)
+    def spin_wheel(self):
+        """Control movement of wheel.""" 
         print(self.step)
         if self.step < self.WHEEL_STOP_STEP:
-            self.parent.after(self.step, self.spin_wheel)
             if self.wheel_position < (len(self.WHEEL_NUMBERS) - 1):
                 self.wheel_position += 1
             else:
                 self.wheel_position = 0
+            self.update_wheel_img()
+            self.parent.after(self.step, self.calculate_next_step)
+            if self.wheel_position == (self.initial_wheel_pos):
+                self.complete_Wheel_turn = True
         else:
-            self.proceed_game()
+            if self.complete_Wheel_turn is False:
+                self.popup_wheel_turn()
+            else:
+                self.proceed_game()
+
+    def calculate_next_step(self):
+        """Determine next step for wheel movement and call 
+        spin_wheel() again."""
+        self.step = math.ceil(self.step * self.WHEEL_DAMPENING)       
+        self.spin_wheel()
+
+    def popup_wheel_turn(self):
+        """Display a popup warning that the wheel did not make a full turn."""
+        self.turn_popup = tk.Toplevel()
+        self.turn_popup.wm_title('Must Make a Full Turn')
+        parent_x = self.parent.winfo_x()
+        parent_y = self.parent.winfo_y()
+        self.turn_popup.geometry(f'520x360+{parent_x + 200}+{parent_y + 200}')
+
+        info_txt = "The wheel didn't make a full turn! Must repeat!"
+        info_lbl = tk.Label(self.turn_popup, text=info_txt, height=15, 
+                            width=50, justify=tk.LEFT, font=('Arial', '10'),
+                            anchor='n', borderwidth=1, relief='solid')
+        info_lbl.grid(row=0, column=0, columnspan=1)
+
+        btn_txt = "Repeat"
+        play_btn = tk.Button(self.turn_popup, text=btn_txt, 
+                             command=self.repeat_play)
+        play_btn.grid(row=1, column=0)
+        self.wheel_active = False
+
+    def repeat_play(self):
+        """Called when wheel doesn't make a full turn. must reset wheel to 
+        where it was before this spin."""
+        self.wheel_position = self.initial_wheel_pos
+        self.update_wheel_img()
+        self.turn_popup.destroy()
+        self.wheel_active = True
 
     def proceed_game(self):
         """Control flow of game after 1st spin. What happens after wheel 
