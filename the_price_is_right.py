@@ -55,10 +55,16 @@ class Game(tk.Frame):
                                   height=2, width=20)
         self.title_lbl.grid(row=0, column=0, columnspan=10, sticky='N')
 
+        arrow_img = tk.PhotoImage(file="imgs/arrow.png")
+        self.arrow_lbl = tk.Label(self.parent, image=arrow_img, text='',
+                                  borderwidth=0)
+        self.arrow_lbl.grid(row=1, column=0, columnspan=1, sticky='W')
+        self.arrow_lbl.image = arrow_img
+
         img = tk.PhotoImage(file="imgs/wheel_100.png")
         self.photo_lbl = tk.Label(self.parent, image=img, text='',
                                   borderwidth=0)
-        self.photo_lbl.grid(row=1, column=0, columnspan=10, sticky='W')
+        self.photo_lbl.grid(row=1, column=1, columnspan=9, sticky='W')
         self.photo_lbl.image = img
         self.photo_lbl.bind('<Button-1>', self.mouse_bt_pressed)
         self.photo_lbl.bind('<ButtonRelease-1>', self.mouse_bt_released)
@@ -135,7 +141,7 @@ class Game(tk.Frame):
 
     def play_again(self):
         """Actions to take to start over."""
-        self.game_over_popup.destroy()
+        self.popup_gameover.destroy()
         self.start()
         self.update_wheel_img()
         self.reset_scores()
@@ -403,7 +409,7 @@ def main():
     """Start here."""
     root = tk.Tk()
     root.title("The Price is Right")
-    root.geometry('1200x760')
+    root.geometry('1345x760')
     game = Game(root)
     root.mainloop()
 
