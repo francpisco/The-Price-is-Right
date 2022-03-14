@@ -13,7 +13,7 @@ class Game(tk.Frame):
 
     WHEEL_SPIN_MULTIPLIER = 50_000
     WHEEL_STOP_STEP = 500
-    WHEEL_DAMPENING = 1.1
+    WHEEL_DAMPENING = 1.1  # Must be about 1.1
     WHEEL_NUMBERS = ('100', '15', '50', '95', '20', '5', '45', '60', '35',
                      '90', '65', '40', '55', '75', '30', '85', '70', '25',
                      '80', '10')
@@ -30,6 +30,8 @@ class Game(tk.Frame):
                     'Whoever gets closer to 100 without going'
                     ' above, wins!\n\n'
                     'Swipe on wheel with touchscreen or mouse to spin wheel.')
+    ROTATION_WARNING = ('Wheel did not make a full rotation. Please repeat'
+                        ' play!')
 
     def __init__(self, parent):
         """Initialize GUI."""
@@ -55,9 +57,9 @@ class Game(tk.Frame):
         defaultbg = self.parent.cget('bg')
         self.title_lbl = tk.Label(self.parent, text='The Price is Right!',
                                   anchor=tk.CENTER, bg=defaultbg,
-                                  font=('Tahoma', '40', 'bold', 'italic'), fg='blue',
-                                  height=2, width=20)
-        self.title_lbl.grid(row=0, column=0, columnspan=10, sticky='N')
+                                  font=('Tahoma', '40', 'bold', 'italic'), 
+                                  fg='blue', height=2, width=20)
+        self.title_lbl.grid(row=0, column=0, columnspan=3, sticky='N')
 
         arrow_img = tk.PhotoImage(file="imgs/arrow.png")
         self.arrow_lbl = tk.Label(self.parent, image=arrow_img, text='',
@@ -68,13 +70,13 @@ class Game(tk.Frame):
         img = tk.PhotoImage(file="imgs/wheel_100.png")
         self.photo_lbl = tk.Label(self.parent, image=img, text='',
                                   borderwidth=1, relief='solid')
-        self.photo_lbl.grid(row=1, column=1, columnspan=9, sticky='W')
+        self.photo_lbl.grid(row=1, column=1, columnspan=1, sticky='W')
         self.photo_lbl.image = img
         self.photo_lbl.bind('<Button-1>', self.mouse_bt_pressed)
         self.photo_lbl.bind('<ButtonRelease-1>', self.mouse_bt_released)
 
         self.instr_frame = tk.Frame(self.parent, height=50, width=50)
-        self.instr_frame.grid(row=1, column=11, columnspan=1, sticky='N', ipadx=0)
+        self.instr_frame.grid(row=1, column=2, columnspan=1, sticky='N', ipadx=0)
 
         self.create_right_frame_widgets()
 
@@ -87,16 +89,18 @@ class Game(tk.Frame):
         parent_y = self.parent.winfo_y()
         self.intro_box.geometry(f'520x360+{parent_x + 200}+{parent_y + 200}')
 
-        inst_lbl = tk.Label(self.intro_box, text=self.INSTRUCTIONS, height=15, 
-                            width=50, justify=tk.LEFT, font=('Arial', '10'),
-                            anchor='n', wraplength=370, borderwidth=1,
-                            relief='solid')
+        inst_lbl = tk.Label(self.intro_box, text=self.INSTRUCTIONS, height=12, 
+                            width=55, justify=tk.LEFT, font=('Tahoma', '12'),
+                            anchor='n', wraplength=450, borderwidth=0,
+                            pady=20)
         inst_lbl.grid(row=0, column=0, columnspan=5)
 
-        play_btn = tk.Button(self.intro_box, text='Play', 
-                            command=self.start_game)
-        play_btn.grid(row=1, column=0)
+        play_btn = tk.Button(self.intro_box, text='Play', width=15, 
+                             font=('Tahoma', '12', 'bold'), pady=5,
+                             command=self.start_game)
+        play_btn.grid(row=1, column=2)
         self.intro_box.attributes('-topmost', 'true')
+        self.intro_box.protocol('WM_DELETE_WINDOW', self.start_game)
 
     def start_game(self):
         """Close introduction box and start game."""
@@ -112,27 +116,28 @@ class Game(tk.Frame):
         """Create widgets inside frame on the right to the photo."""
 
         defaultbg = self.instr_frame.cget('bg')
-        self.game_play_txt = tk.Text(self.instr_frame, width=25, height=1, 
+        self.game_play_txt = tk.Text(self.instr_frame, width=23, height=1, 
                                      bg=defaultbg, borderwidth=0, 
                                      font=('Tahoma', '18', 'bold'), fg='green')
-        self.game_play_txt.grid(row=0, column=0, columnspan=4, padx=20, pady=50)
+        self.game_play_txt.grid(row=0, column=0, columnspan=4, padx=20, 
+                                pady=50)
 
         score_board_input = [
-            ('1st spin', 8, 1, 1), ('2nd spin', 8, 1, 2), ('total', 8, 1, 3),
-            ('1st player', 10, 2, 0), ('2nd player', 10, 3, 0), 
-            ('3rd player', 10, 4, 0)
+            ('1st spin', 1, 1), ('2nd spin', 1, 2), ('total', 1, 3),
+            ('1st player', 2, 0), ('2nd player', 3, 0), 
+            ('3rd player', 4, 0)
             ]
-        for text, width, row, column in score_board_input:
+        for text, row, column in score_board_input:
             self.lbl = tk.Label(self.instr_frame, text=text, height=2, 
-                                width=width, font=('Tahoma', '12'), anchor='n', 
+                                width=10, font=('Tahoma', '12'), anchor='n', 
                                 borderwidth=0)
-            self.lbl.grid(row=row, column=column, sticky='n', pady=10, padx=1)
+            self.lbl.grid(row=row, column=column, sticky='n', pady=10, padx=0)
 
         self.score_txt_list = []
         for r in range(3):
             scores_row = []
             for c in range(3):
-                txt = tk.Text(self.instr_frame, height=1, width=5)
+                txt = tk.Text(self.instr_frame, height=1, width=3, font=('Tahoma', '12'))
                 txt.grid(row=r + 2, column=c + 1, sticky='n', pady=10)
                 scores_row.append(txt)
             self.score_txt_list.append(scores_row)
@@ -216,24 +221,27 @@ class Game(tk.Frame):
 
 
     def popup_wheel_turn(self):
-        """Display a popup warning that the wheel did not make a full turn."""
+        """Display a popup warning that the wheel did not make a full 
+        rotation."""
         self.turn_popup = tk.Toplevel()
-        self.turn_popup.wm_title('Must Make a Full Turn')
+        self.turn_popup.wm_title('Must Make a Complete Rotation')
         parent_x = self.parent.winfo_x()
         parent_y = self.parent.winfo_y()
         self.turn_popup.geometry(f'520x360+{parent_x + 200}+{parent_y + 200}')
 
-        info_txt = "The wheel didn't make a full turn! Must repeat!"
-        info_lbl = tk.Label(self.turn_popup, text=info_txt, height=15, 
-                            width=50, justify=tk.LEFT, font=('Arial', '10'),
-                            anchor='n', borderwidth=1, relief='solid')
+        info_lbl = tk.Label(self.turn_popup, text=self.ROTATION_WARNING, 
+                            height=1, width=52, justify=tk.LEFT, 
+                            font=('Tahoma', '12', 'bold'), fg='red',
+                            anchor='n', borderwidth=0, pady=70)
         info_lbl.grid(row=0, column=0, columnspan=1)
 
         btn_txt = "Repeat"
         play_btn = tk.Button(self.turn_popup, text=btn_txt, 
-                             command=self.repeat_play)
+                             font=('Tahoma', '12', 'bold'),
+                             command=self.repeat_play, pady=5, padx=30)
         play_btn.grid(row=1, column=0)
         self.wheel_active = False
+        self.turn_popup.protocol('WM_DELETE_WINDOW', self.repeat_play)
 
     def repeat_play(self):
         """Called when wheel doesn't make a full turn. must reset wheel to 
@@ -271,9 +279,9 @@ class Game(tk.Frame):
 
         info_txt = (f'Player {self.current_player + 1} total:'
                     f' {self.player_scores[self.current_player]}')
-        info_lbl = tk.Label(self.game_popup, text=info_txt, height=15, 
-                            width=50, justify=tk.LEFT, font=('Arial', '10'),
-                            anchor='n', borderwidth=1, relief='solid')
+        info_lbl = tk.Label(self.game_popup, text=info_txt, height=1, 
+                            width=42, justify=tk.LEFT, font=('Tahoma', '16'),
+                            anchor='n', borderwidth=0, pady=80)
         info_lbl.grid(row=0, column=0, columnspan=1)
 
         if self.current_player < 2:
@@ -281,9 +289,11 @@ class Game(tk.Frame):
         else:
             btn_txt = 'Continue'
         play_btn = tk.Button(self.game_popup, text=btn_txt, 
+                             font=('Tahoma', '12', 'bold'), pady=5, padx=30, 
                              command=self.continue_game)
         play_btn.grid(row=1, column=0)
         self.wheel_active = False
+        self.game_popup.protocol('WM_DELETE_WINDOW', self.continue_game)
 
     def continue_game(self):
         """Close game pop up window and continue game."""
@@ -311,34 +321,39 @@ class Game(tk.Frame):
     def ask_2nd_spin(self):
         """Ask player if she wants to spin a second time."""
         self.wheel_active = False
-        self.popup_win = tk.Toplevel()
-        self.popup_win.wm_title('Play again?')
+        self.popup_win_2nd = tk.Toplevel()
+        self.popup_win_2nd.wm_title('Play again?')
         parent_x = self.parent.winfo_x()
         parent_y = self.parent.winfo_y()
-        self.popup_win.geometry(f'520x360+{parent_x + 200}+{parent_y + 200}')
-        message = ('Your current score is '
+        self.popup_win_2nd.geometry(f'520x360+{parent_x + 200}+{parent_y + 200}')
+        message = (f'Player {self.current_player + 1} your current score is '
                    f'{self.player_scores[self.current_player]}!\n'
                    'Do you want to play again?')
-        score_lbl = tk.Label(self.popup_win, text=message)
-        score_lbl.grid(row=0, column=0)
-        yes_btn = tk.Button(self.popup_win, text='yes', 
+        score_lbl = tk.Label(self.popup_win_2nd, text=message, 
+                             font=('Tahoma', '14'), pady=70, anchor='n', 
+                             width=50)
+        score_lbl.grid(row=0, column=0, columnspan=2)
+        yes_btn = tk.Button(self.popup_win_2nd, text='Yes', 
+                            font=('Tahoma', '12', 'bold'), pady=5, padx=30,
                             command=self.yes_second_spin)
         yes_btn.grid(row=1, column=0)
-        no_btn = tk.Button(self.popup_win, text='no',
+        no_btn = tk.Button(self.popup_win_2nd, text='No',
+                           font=('Tahoma', '12', 'bold'), pady=5, padx=30,
                            command=self.no_second_spin)
         no_btn.grid(row=1, column=1)
+        self.popup_win_2nd.protocol('WM_DELETE_WINDOW', self.no_second_spin)
 
     def yes_second_spin(self):
         """Action to take when player wants to spin the wheel a second time."""
         self.current_spin = 1
-        self.popup_win.destroy()
+        self.popup_win_2nd.destroy()
         self.wheel_active = True
         
     def no_second_spin(self):
         """Action to take when player does not want to play again."""
         self.display_total()
         self.show_player_total = True
-        self.popup_win.destroy()
+        self.popup_win_2nd.destroy()
         if self.current_player < 2:
             self.display_game_popup()
             self.update_game_txt()
@@ -393,15 +408,20 @@ class Game(tk.Frame):
         parent_x = self.parent.winfo_x()
         parent_y = self.parent.winfo_y()
         self.popup_gameover.geometry(f'520x360+{parent_x + 200}+{parent_y + 200}')
-        message = ('Winner is')
-        message_lbl = tk.Label(self.popup_gameover, text=message)
-        message_lbl.grid(row=0, column=0)
-        play_btn = tk.Button(self.popup_gameover, text='Play again', 
-                            command=self.play_again)
+        if len(self.winners) == 1:
+            message = (f'Winner is player {self.winners[0] + 1}!\n'
+                       'Congratulations!')
+        else:
+            message = 'There is a tie!'
+        message_lbl = tk.Label(self.popup_gameover, text=message, font=('Tahoma', '16'), width=42, pady=75)
+        message_lbl.grid(row=0, column=0, columnspan=2)
+        play_btn = tk.Button(self.popup_gameover, text='Play Again', font=('Tahoma', '12', 'bold'), pady=5, width=12,
+                             command=self.play_again)
         play_btn.grid(row=1, column=0)
-        exit_btn = tk.Button(self.popup_gameover, text='exit',
-                           command=sys.exit)
+        exit_btn = tk.Button(self.popup_gameover, text='Exit', font=('Tahoma', '12', 'bold'), pady=5, width=12,
+                             command=sys.exit)
         exit_btn.grid(row=1, column=1)
+        self.popup_gameover.protocol('WM_DELETE_WINDOW', sys.exit)
 
 def main():
     """Start here."""
