@@ -18,14 +18,18 @@ class Game(tk.Frame):
                      '90', '65', '40', '55', '75', '30', '85', '70', '25',
                      '80', '10')
     INSTRUCTIONS = ('Instructions:\n\n'
-                    'There are three players. Wins who gets closer to 100'
-                    ' without going over. Each player starts by spinning the'
-                    ' wheel once. After that, she can choose to spin it a'
-                    ' second time or not. Anyone who goes over 100 looses'
-                    ' immediately. In the end the player closer to 100 that'
-                    ' did not go over, wins!\n\n'
-                    'Statistics are presented to display who has the better'
-                    ' chance of whinning.')
+                    'The game consists of three players trying to get to as'
+                    ' close to 100 points as possible by spinning the wheel.'
+                    ' After the first spin, each player choses if she wants to'
+                    ' spin the wheel a second time. Anyone that goes above'
+                    ' 100 points looses.\n'
+                    'The wheel must make at least a full rotation for the' 
+                    ' play to be valid.\n'
+                    'Wheel speed is a function of sweeping speed and'
+                    ' distance.\n'
+                    'Whoever gets closer to 100 without going'
+                    ' above, wins!\n\n'
+                    'Swipe on wheel with touchscreen or mouse to spin wheel.')
 
     def __init__(self, parent):
         """Initialize GUI."""
@@ -51,7 +55,7 @@ class Game(tk.Frame):
         defaultbg = self.parent.cget('bg')
         self.title_lbl = tk.Label(self.parent, text='The Price is Right!',
                                   anchor=tk.CENTER, bg=defaultbg,
-                                  font=('Arial', '32', 'bold'), fg='dark grey',
+                                  font=('Tahoma', '40', 'bold', 'italic'), fg='blue',
                                   height=2, width=20)
         self.title_lbl.grid(row=0, column=0, columnspan=10, sticky='N')
 
@@ -63,7 +67,7 @@ class Game(tk.Frame):
 
         img = tk.PhotoImage(file="imgs/wheel_100.png")
         self.photo_lbl = tk.Label(self.parent, image=img, text='',
-                                  borderwidth=0)
+                                  borderwidth=1, relief='solid')
         self.photo_lbl.grid(row=1, column=1, columnspan=9, sticky='W')
         self.photo_lbl.image = img
         self.photo_lbl.bind('<Button-1>', self.mouse_bt_pressed)
@@ -72,7 +76,7 @@ class Game(tk.Frame):
         self.instr_frame = tk.Frame(self.parent, height=50, width=50)
         self.instr_frame.grid(row=1, column=11, columnspan=1, sticky='N', ipadx=0)
 
-        self.create_instr_frame_widgets()
+        self.create_right_frame_widgets()
 
     def introduction_box(self):
         """Create an introduction pop up box to display instructions and
@@ -104,38 +108,32 @@ class Game(tk.Frame):
         self.parent.attributes('-topmost', 'false')
 
         
-    def create_instr_frame_widgets(self):
-        """Create widgets inside instructions frame, to the right of the 
-        photo."""
-
-        self.instruction_lbl = tk.Label(self.instr_frame, text=self.INSTRUCTIONS, 
-                                        height=15, width=50, justify=tk.LEFT, 
-                                        font=('Arial', '10'), anchor='n', 
-                                        wraplength=370, borderwidth=1, relief='solid')
-        self.instruction_lbl.grid(row=0, column=0, columnspan=5)
+    def create_right_frame_widgets(self):
+        """Create widgets inside frame on the right to the photo."""
 
         defaultbg = self.instr_frame.cget('bg')
-        self.game_play_txt = tk.Text(self.instr_frame, width=30, height=1, 
-                                     bg=defaultbg, borderwidth=0, font=('30'), fg='green')
-        self.game_play_txt.grid(row=1, column=0, columnspan=5, padx=30, pady=30)
+        self.game_play_txt = tk.Text(self.instr_frame, width=25, height=1, 
+                                     bg=defaultbg, borderwidth=0, 
+                                     font=('Tahoma', '18', 'bold'), fg='green')
+        self.game_play_txt.grid(row=0, column=0, columnspan=4, padx=20, pady=50)
 
         score_board_input = [
-            ('1st spin', 8, 2, 1), ('2nd spin', 8, 2, 2), ('total', 8, 2, 3),
-            ('1st player', 10, 3, 0), ('2nd player', 10, 4, 0), 
-            ('3rd player', 10, 5, 0)
+            ('1st spin', 8, 1, 1), ('2nd spin', 8, 1, 2), ('total', 8, 1, 3),
+            ('1st player', 10, 2, 0), ('2nd player', 10, 3, 0), 
+            ('3rd player', 10, 4, 0)
             ]
         for text, width, row, column in score_board_input:
-            self.lbl = tk.Label(self.instr_frame, text=text, height=1, 
-                                width=width, font=('Arial', '10'), anchor='n', 
-                                borderwidth=1, relief='solid')
-            self.lbl.grid(row=row, column=column, sticky='w', pady=5)
+            self.lbl = tk.Label(self.instr_frame, text=text, height=2, 
+                                width=width, font=('Tahoma', '12'), anchor='n', 
+                                borderwidth=0)
+            self.lbl.grid(row=row, column=column, sticky='n', pady=10, padx=1)
 
         self.score_txt_list = []
         for r in range(3):
             scores_row = []
             for c in range(3):
                 txt = tk.Text(self.instr_frame, height=1, width=5)
-                txt.grid(row=r + 3, column=c + 1, sticky='w')
+                txt.grid(row=r + 2, column=c + 1, sticky='n', pady=10)
                 scores_row.append(txt)
             self.score_txt_list.append(scores_row)
 
