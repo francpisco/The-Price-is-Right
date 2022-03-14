@@ -395,10 +395,10 @@ class Game(tk.Frame):
             color = 'red'
         self.game_play_txt.config(fg=color)
         if self.show_player_total:
-            self.game_play_txt.insert('1.0', f'Player total: {player_total}!')
+            text = f'Player {self.current_player + 1} total: {player_total}!'
         else:
-            self.game_play_txt. \
-                insert('1.0', f'Player {self.current_player + 1} spin!')
+            text = f'Player {self.current_player + 1} spin the wheel!'
+        self.game_play_txt.insert('1.0', text)
 
     def game_over_popup(self):
         """Display a popup at the end of the game, displaying winner, and 2 
